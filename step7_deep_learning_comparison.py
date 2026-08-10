@@ -13,22 +13,30 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from tensorflow import keras
 from tensorflow.keras import layers, callbacks, regularizers
 
-# --- 1. CARICAMENTO E PREPARAZIONE ---
+# --- 1. CARICAMENTO E PREPARAZIONE (60 / 20 / 20) ---
 print("Caricamento dataset...")
 df = pd.read_pickle("02_dataset_encoded.pkl")
 
-split_point = int(len(df) * 0.80)
+# Divisione temporale manuale per rispettare i requisiti accademici
+train_split = int(len(df) * 0.60)
+val_split = int(len(df) * 0.80)
+
 X = df.drop(columns=['target_tempo_rimanente', 'target_bottleneck'])
 y = df['target_bottleneck']
 
-X_train = X.iloc[:split_point]
-X_test = X.iloc[split_point:]
-y_train = y.iloc[:split_point]
-y_test = y.iloc[split_point:]
+# Training (60%), Validation (20%), Test (20%)
+X_train = X.iloc[:train_split]
+X_val = X.iloc[train_split:val_split]
+X_test = X.iloc[val_split:]
 
-# Scaling (Obbligatorio per DL)
+y_train = y.iloc[:train_split]
+y_val = y.iloc[train_split:val_split]
+y_test = y.iloc[val_split:]
+
+# Scaling (Obbligatorio per DL, fittato SOLO sul Training)
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
+X_val_scaled = scaler.transform(X_val) # Scaliamo anche il Validation
 X_test_scaled = scaler.transform(X_test)
 
 # --- 2. IL TRUCCO: CALCOLO DEI PESI (Class Weights) ---
@@ -69,18 +77,18 @@ opt = keras.optimizers.Adam(learning_rate=0.001)
 
 model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 
-# --- 4. ADDESTRAMENTO CON PESI ---
+# --- 4. ADDESTRAMENTO CON PESI (E VALIDATION SEPARATO) ---
 early_stop = callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=0.00001)
 
-print("\nAvvio addestramento Deep Learning (Revenge Mode)...")
+print("\nAvvio addestramento Deep Learning...")
 history = model.fit(
     X_train_scaled, y_train,
-    epochs=100, # Più epoche
-    batch_size=128, # Batch più grande
-    validation_split=0.2,
+    epochs=100, 
+    batch_size=128, 
+    validation_data=(X_val_scaled, y_val), 
     callbacks=[early_stop, reduce_lr],
-    class_weight=class_weights_dict, # <--- QUI STA LA MAGIA
+    class_weight=class_weights_dict, 
     verbose=1
 )
 

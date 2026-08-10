@@ -7,21 +7,31 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error, classi
 print("Caricamento dataset...")
 df = pd.read_pickle("02_dataset_encoded.pkl")
 
-# --- 2. SPLIT TEMPORALE ---
-split_point = int(len(df) * 0.80)
+# --- 2. SPLIT TEMPORALE (60 / 20 / 20) ---
+train_split = int(len(df) * 0.60)
+val_split = int(len(df) * 0.80)
+
 colonne_target = ['target_tempo_rimanente', 'target_bottleneck']
 X = df.drop(columns=colonne_target)
 y_tempo = df['target_tempo_rimanente']
 y_bottleneck = df['target_bottleneck']
 
-X_train = X.iloc[:split_point]
-X_test = X.iloc[split_point:]
-y_tempo_train = y_tempo.iloc[:split_point]
-y_tempo_test = y_tempo.iloc[split_point:]
-y_bott_train = y_bottleneck.iloc[:split_point]
-y_bott_test = y_bottleneck.iloc[split_point:]
+# Training Set (60%)
+X_train = X.iloc[:train_split]
+y_tempo_train = y_tempo.iloc[:train_split]
+y_bott_train = y_bottleneck.iloc[:train_split]
 
-print(f"Training su {len(X_train)} campioni con {len(X.columns)} feature.")
+# Validation Set (20%) - Spartiacque temporale
+X_val = X.iloc[train_split:val_split]
+y_tempo_val = y_tempo.iloc[train_split:val_split]
+y_bott_val = y_bottleneck.iloc[train_split:val_split]
+
+# Test Set (20%) - Il "Futuro" su cui testiamo
+X_test = X.iloc[val_split:]
+y_tempo_test = y_tempo.iloc[val_split:]
+y_bott_test = y_bottleneck.iloc[val_split:]
+
+print(f"Training su {len(X_train)} campioni | Validation: {len(X_val)} | Test: {len(X_test)} con {len(X.columns)} feature.")
 
 # --- 3. XGBOOST REGRESSOR (Tempo) ---
 print("\n--- XGBoost: Predizione Tempo ---")

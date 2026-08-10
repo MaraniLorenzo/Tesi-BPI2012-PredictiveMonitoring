@@ -48,7 +48,8 @@ for id_caso, gruppo in tqdm(gruppi_casi):
     lista_tempi = gruppo['time:timestamp'].tolist()
     lista_risorse = gruppo['org:resource'].tolist() if 'org:resource' in gruppo.columns else ['Sconosciuto']*len(gruppo)
     lista_workload = gruppo['active_cases'].tolist() # ### NUOVO ###
-    lista_importi = gruppo['AMOUNT_REQ'].tolist() if 'AMOUNT_REQ' in gruppo.columns else [0]*len(gruppo)
+    col_amt = 'case:AMOUNT_REQ' if 'case:AMOUNT_REQ' in gruppo.columns else ('AMOUNT_REQ' if 'AMOUNT_REQ' in gruppo.columns else None)
+    lista_importi = pd.to_numeric(gruppo[col_amt], errors='coerce').fillna(0).tolist() if col_amt else [0]*len(gruppo)
 
     tempo_fine_caso = lista_tempi[-1]
     contatore_attivita = {att: 0 for att in dataset['concept:name'].unique()}

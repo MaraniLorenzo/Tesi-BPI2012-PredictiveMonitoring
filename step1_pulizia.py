@@ -46,9 +46,6 @@ print(f"Dimensioni dopo pulizia: {len(df_clean)} eventi, {df_clean['case:concept
 # Per semplicità, teniamo solo le righe 'COMPLETE' per le attività W_, calcolando la durata.
 # (Questa è una semplificazione accettabile per ridurre la complessità computazionale della tesi)
 
-# Esempio: mantenere solo eventi COMPLETE ma calcolare la durata se c'era uno START
-# Per ora, salviamo il dataset pulito così com'è per non perdere informazioni.
-
 # --- 5. SALVATAGGIO ---
 print("Salvataggio del dataset pulito...")
 df_clean.to_pickle("bpi2012_cleaned.pkl") # Pickle mantiene i tipi di dato (es. datetime)
