@@ -1,7 +1,7 @@
 # Predictive Process Monitoring - BPI Challenge 2012
 
 Progetto di Tesi Triennale in Ingegneria Informatica.
-Autore: [Il Tuo Nome]
+Autore: Lorenzo Marani
 
 ## Descrizione
 Questo progetto implementa una pipeline di Machine Learning per predire i tempi di completamento e i colli di bottiglia nel processo di richiesta prestiti (dataset BPI Challenge 2012).
